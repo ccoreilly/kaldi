@@ -31,7 +31,7 @@ include kaldi.mk
 
 # Reset the default goal, so that the all target will become default
 .DEFAULT_GOAL :=
-all: $(SUBDIRS) matrix/test
+all: $(SUBDIRS) #matrix/test
 	-echo Done
 
 mklibdir:

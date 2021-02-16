@@ -60,7 +60,7 @@ case $compiler_ver_info in
 esac
 
 # Cannot check this without a compiler.
-if have "$CXX" && ! echo "#include <zlib.h>" | $CXX $CXXFLAGS -E - &>/dev/null; then
+if have "$CXX" && ! $CXX $CXXFLAGS -I/usr/include -E "$(dirname $0)/zlib_test.h" >&/dev/null; then
   echo "$0: zlib is not installed."
   add_packages zlib-devel zlib1g-dev
 fi

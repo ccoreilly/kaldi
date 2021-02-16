@@ -1,6 +1,10 @@
 
 SHELL := /bin/bash
 
+ifeq ($(notdir ${CC}), emcc)
+  IS_EMSCRIPTEN = true
+endif
+
 ifeq ($(KALDI_FLAVOR), dynamic)
   ifeq ($(shell uname), Darwin)
     ifdef ANDROIDINC # cross-compiling enabled on host MacOS
@@ -26,6 +30,11 @@ ifeq ($(KALDI_FLAVOR), dynamic)
     $(error Dynamic libraries not supported on this platform. Run configure with --static flag.)
   endif
   XDEPENDS =
+else ifdef IS_EMSCRIPTEN
+  ifdef LIBNAME
+    LIBFILE = $(LIBNAME).bc
+  endif
+  XDEPENDS = $(foreach dep,$(ADDLIBS), $(dir $(dep))$(notdir $(basename $(dep))).bc)
 else
   ifdef LIBNAME
     LIBFILE = $(LIBNAME).a
@@ -33,14 +42,22 @@ else
   XDEPENDS = $(ADDLIBS)
 endif
 
+ifdef IS_EMSCRIPTEN
+all: $(LIBFILE)
+else
 all: $(LIBFILE) $(BINFILES)
-
+endif
 
 ifdef LIBNAME
 
+ifdef IS_EMSCRIPTEN
+$(LIBNAME).bc: $(OBJFILES)
+	$(CXX) -o $(LIBNAME).bc $(OBJFILES)
+else
 $(LIBNAME).a: $(OBJFILES)
 	$(AR) -cr $(LIBNAME).a $(OBJFILES)
 	$(RANLIB) $(LIBNAME).a
+endif
 
 ifeq ($(KALDI_FLAVOR), dynamic)
 # the LIBFILE is not the same as $(LIBNAME).a
@@ -78,11 +95,14 @@ endif
 %.a:
 	$(MAKE) -C ${@D} ${@F}
 
+%.bc:
+	$(MAKE) -C ${@D} ${@F}
+
 %.so:
 	$(MAKE) -C ${@D} ${@F}
 
 clean:
-	-rm -f *.o *.a *.so *.dylib $(OBJFILES) $(TESTFILES) $(BINFILES) $(TESTOUTPUTS) tmp* *.tmp *.testlog
+	-rm -f *.o *.a *.bc *.so *.dylib $(OBJFILES) $(TESTFILES) $(BINFILES) $(TESTOUTPUTS) tmp* *.tmp *.testlog
 
 distclean: clean
 	-rm -f .depend.mk
