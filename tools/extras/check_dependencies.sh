@@ -59,12 +59,6 @@ case $compiler_ver_info in
     ;;
 esac
 
-# Cannot check this without a compiler.
-if have "$CXX" && ! $CXX $CXXFLAGS -I/usr/include -E "$(dirname $0)/zlib_test.h" >&/dev/null; then
-  echo "$0: zlib is not installed."
-  add_packages zlib-devel zlib1g-dev
-fi
-
 for f in make automake autoconf patch grep bzip2 gzip unzip wget git sox; do
   if ! have $f; then
     echo "$0: $f is not installed."
