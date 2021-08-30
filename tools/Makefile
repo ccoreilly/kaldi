@@ -83,6 +83,7 @@ endif
 
 openfst-$(OPENFST_VERSION)/Makefile: openfst-$(OPENFST_VERSION)
 	cd openfst-$(OPENFST_VERSION)/ && \
+		git apply -v ../openfst.patch && \
         autoreconf -i && \
 	./configure --prefix=`pwd` $(OPENFST_CONFIGURE) CXX="$(CXX)" \
 		CXXFLAGS="$(CXXFLAGS) $(openfst_add_CXXFLAGS)" \
