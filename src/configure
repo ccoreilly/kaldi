@@ -86,7 +86,6 @@ Configuration options:
   --atlas-root=DIR      ATLAS root directory [default=../tools/ATLAS/]
   --openblas-root=DIR   OpenBLAS root directory
   --clapack-root=DIR    CLAPACK root directory
-  --gsl-root=DIR        GSL root directory
   --mkl-root=DIR        MKL root directory
   --mkl-libdir=DIR      MKL library directory
   --omp-libdir=DIR      OpenMP directory
@@ -692,9 +691,6 @@ do
   --clapack-root=*)
     GetSwitchExistingPathOrDie CLAPACKROOT "$1"
     shift ;;
-  --gsl-root=*)
-    GetSwitchExistingPathOrDie GSLROOT "$1"
-    shift ;;
   --openblas-root=*)
     GetSwitchExistingPathOrDie OPENBLASROOT "$1"
     shift ;;
@@ -975,23 +971,9 @@ elif [ "$(basename $CC)" == "emcc" ]; then
     failure "The directory $CLAPACKROOT does not exist"
   fi
 
-  if [ -z "$GSLROOT" ]; then
-    failure "Must specify the location of GSL with --gsl-root option (and it must exist)"
-  fi
-  if [ ! -d "$GSLROOT" ]; then
-    failure "The directory $GSLROOT does not exist"
-  fi
-
   for lib in F2CLIBS/libf2c.bc lapack_WA.bc libcblaswr.bc; do
     CLAPACKLIBS="$CLAPACKLIBS $CLAPACKROOT/$lib"
   done
-  if [ "`uname`" == "Darwin"  ]; then
-    CLAPACKLIBS="$CLAPACKLIBS $GSLROOT/cblas/.libs/libgslcblas.dylib"
-  elif [ "`uname`" == "Linux" ]; then
-    CLAPACKLIBS="$CLAPACKLIBS $GSLROOT/cblas/.libs/libgslcblas.so"
-  else
-    failure "Emscripten is not supported on this platform."
-  fi
 
   echo "CLAPACKLIBS = $CLAPACKLIBS" >> kaldi.mk
 
